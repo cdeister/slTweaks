@@ -15,6 +15,12 @@ st.header('Daily Tech Tweaking')
 def avgAndSmoothPandasData(pandaFrame, avgWin=10, smthWin=4, smthStd = 5):
     rAvgSmth=pandaFrame.rolling(avgWin).mean().rolling(smthWin,win_type='gaussian').mean(std=smthStd)
     return rAvgSmth
+def avgAndSmoothPandasDataMax(pandaFrame, avgWin=10, smthWin=4, smthStd = 5):
+    rAvgSmth=pandaFrame.rolling(avgWin).max().rolling(smthWin,win_type='gaussian').mean(std=smthStd)
+    return rAvgSmth
+def avgAndSmoothPandasDataMin(pandaFrame, avgWin=10, smthWin=4, smthStd = 5):
+    rAvgSmth=pandaFrame.rolling(avgWin).min().rolling(smthWin,win_type='gaussian').mean(std=smthStd)
+    return rAvgSmth
 def avgAndSmoothPandasDataCOV(pandaFrameA,pandFrameB, avgWin=10, smthWin=4, smthStd = 5):
 	rAvgSmthCOV=pandaFrameA.rolling(avgWin).cov(pandFrameB).rolling(smthWin,win_type='gaussian').mean(std=smthStd)
 	# rAvgSmthCOV=rAvgSmthCOV.fillna(method='ffill')
@@ -58,9 +64,14 @@ def load_data(tickerNm):
 	return impData
 
 def compute_ADScore(acData, ad_weight):
-	totalMax=np.max(acData)
-	totalMin=np.min(acData)
 
+	totalMax=avgAndSmoothPandasDataMax(acData)
+	totalMin=avgAndSmoothPandasDataMin(acData)
+
+	# totalMax=np.max(acData)
+	# totalMin=np.min(acData)
+
+	# mTSc=acData
 	mTSc=1-((totalMax-acData)/(totalMax-totalMin))
 
 	mTScTh=np.zeros(np.shape(mTSc))
@@ -78,8 +89,6 @@ def compute_ADScore(acData, ad_weight):
 
 def compute_PPScore(ppData, pp_weight):
 	rPDynTh=np.zeros(np.shape(ppData))
-	
-	
 
 	rPDynTh[np.where(ppData<=0.01)[0]]=1
 	rPDynTh[np.where((ppData>0.01) & (ppData<=0.05))[0]]=2
