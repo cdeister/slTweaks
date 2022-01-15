@@ -1,1 +1,5 @@
 bokeh
+pandas
+numpy
+signal
+scipy
